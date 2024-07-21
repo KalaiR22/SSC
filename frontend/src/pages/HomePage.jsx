@@ -8,13 +8,14 @@ import Challenges from '../components/Challenges'
 
 export default function HomePage() {
   return (
-    <div className=' absolute'>
-      <Hero/>
-      <Service/>
-      <Challenges/>
-      <WhyChallenge/>
-      <Explore/>
-      <Footer/>
-      </div>
-  )
+    <div className=" absolute">
+      
+      <Hero />
+      <Service />
+      <Challenges />
+      <WhyChallenge />
+      <Explore />
+      <Footer />
+    </div>
+  );
 }

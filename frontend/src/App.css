@@ -3,3 +3,21 @@
  
 }
 
+.login{
+  background-image: url('./images/login.png');
+  background-size: contain;
+
+}
+
+.input-box{
+  @apply bg-lightblue border border-lightgrey placeholder:text-lightgrey rounded-lg h-11 w-full px-3
+}
+
+
+.calender{
+  background-image: url('./images//calender.png');
+  height: fit-content;
+  background-size:cover;
+  
+  
+}
