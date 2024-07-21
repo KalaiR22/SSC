@@ -1,11 +1,12 @@
 import Auth from "../models/auth.model.js";
 import bcryptjs from 'bcryptjs';
+import dotenv from 'dotenv';
 import { errorHandler } from '../Utils/error.js';
 import jwt from 'jsonwebtoken';
 import twilio from 'twilio';
-
-const accountSid = 'AC0d02766f687398779ec8bbf4ab831ea6';
-const authToken = '5200800c51e72c0ad9f632ce582b8a41';
+dotenv.config();
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = twilio(accountSid, authToken);
 
 const otpStore = {};
@@ -71,7 +72,7 @@ export const sendOtp = async (req, res, next) => {
 
         await client.messages.create({
             body: `Your OTP code for SSC is ${otp}`,
-            from: '+19382225515',
+            from: process.env.NUMBER,
             to: formattedPhoneNumber
         });
 
