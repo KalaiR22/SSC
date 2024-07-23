@@ -12,6 +12,8 @@ import SignUp from './pages/SignUp';
 import ConditionalHeader from './components/ConditionalHeader';
 import Dashboard from './pages/Dashboard';
 import Task from './pages/Task';
+import ForgetPassword from './pages/ForgetPassword';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
 
@@ -19,14 +21,16 @@ function App() {
   return (
     <>
       <Router>
-        <ConditionalHeader />
+        
         <div>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path='/tasks' element={<Task/>} />
+            <Route path="/task/:taskId" element={<Task />} />
+            <Route path="/forgetpassword" element={<ForgetPassword />} />
+            <Route path="/resetpassword/:token" element={<ResetPassword />} />
           </Routes>
         </div>
       </Router>

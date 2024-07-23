@@ -1,15 +1,24 @@
 import Auth from "../models/auth.model.js";
 import bcryptjs from 'bcryptjs';
-import dotenv from 'dotenv';
 import { errorHandler } from '../Utils/error.js';
 import jwt from 'jsonwebtoken';
-import twilio from 'twilio';
-dotenv.config();
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const client = twilio(accountSid, authToken);
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
 
-const otpStore = {};
+dotenv.config();
+
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST,
+  port: process.env.EMAIL_PORT,
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+let otpStore = {};
+
 
 const generateToken = (user) => {
     return jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -52,83 +61,90 @@ const userExists = async (phoneNumber, email) => {
 };
 
 export const sendOtp = async (req, res, next) => {
-    const { phoneNumber, email } = req.body;
+  const { email } = req.body;
 
-    if (!phoneNumber) {
-        return next(errorHandler(400, 'Phone number is required'));
+  if (!email) {
+    return next(errorHandler(400, 'Email is required'));
+  }
+
+  try {
+    const exists = await userExists(email);
+    if (exists) {
+      return next(errorHandler(400, 'Email already exists'));
     }
 
-    try {
-        const exists = await userExists(phoneNumber, email);
-        if (exists) {
-            return next(errorHandler(400, 'Phone number or email already exists'));
-        }
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-        const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        otpStore[formattedPhoneNumber] = otp;
+    // Store OTP temporarily
+    otpStore[email] = otp;
 
-        console.log(`Stored OTP for ${formattedPhoneNumber}: ${otp}`); // Debug log
+    // Send OTP email
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Your OTP Code for SSC',
+      text: `Your OTP code  for Sustainability summer challenge is ${otp}`
+    };
 
-        await client.messages.create({
-            body: `Your OTP code for SSC is ${otp}`,
-            from: process.env.NUMBER,
-            to: formattedPhoneNumber
-        });
-
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+        return next(errorHandler(500, 'Failed to send OTP'));
+      } else {
+        console.log('Email sent:', info.response);
         res.json({ message: 'OTP sent successfully' });
-    } catch (error) {
-        next(error);
-    }
-};
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+}; 
+
+
 
 export const verifyOtp = async (req, res, next) => {
-    const { phoneNumber, otp, username, email, password } = req.body;
+  const { otp, username, email, password } = req.body;
 
-    console.log('Request Body:', req.body); // Log request data
+  console.log('Request Body:', req.body); // Log request data
 
-    const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
-    console.log('Stored OTP:', otpStore[formattedPhoneNumber]); // Log stored OTP
-    console.log('Received OTP:', otp); // Log received OTP
+  if (!otp || !username || !email || !password) {
+    return next(errorHandler(400, 'All fields are required'));
+  }
 
-    if (!phoneNumber || !otp || !username || !email || !password) {
-        return next(errorHandler(400, 'All fields are required'));
+  try {
+    // Verify OTP
+    if (otpStore[email] !== otp) {
+      return next(errorHandler(400, 'Invalid OTP'));
     }
 
-    if (otpStore[formattedPhoneNumber] !== otp) {
-        console.log('OTP does not match'); // Debug message
-        return res.status(400).json({ message: 'Invalid OTP' });
+    // Remove the OTP from the store after verification
+    delete otpStore[email];
+
+    const hashedPassword = await bcryptjs.hash(password, 10);
+
+    let user = await Auth.findOne({ email });
+
+    if (user) {
+      user.username = username;
+      user.password = hashedPassword;
+      user.isemailverified = true;
+      await user.save();
+    } else {
+      user = new Auth({
+        username,
+        email,
+        password: hashedPassword,
+        isemailverified: true
+      });
+      await user.save();
     }
 
-    delete otpStore[formattedPhoneNumber];
-
-    try {
-        const hashedPassword = await bcryptjs.hash(password, 10);
-
-        let user = await Auth.findOne({ phoneNumber: formattedPhoneNumber });
-
-        if (user) {
-            user.username = username;
-            user.email = email;
-            user.password = hashedPassword;
-            user.ismobileverified = true;
-            await user.save();
-        } else {
-            user = new Auth({
-                phoneNumber: formattedPhoneNumber,
-                username,
-                email,
-                password: hashedPassword,
-                ismobileverified: true
-            });
-            await user.save();
-        }
-
-        res.json({ message: 'Phone number verified and user data updated' });
-    } catch (error) {
-        console.error('Error:', error); // Log the error
-        next(error);
-    }
+    res.json({ message: 'email verified' });
+  } catch (error) {
+    console.error('Error:', error); // Log the error
+    next(error);
+  }
 };
 
 

@@ -92,9 +92,11 @@ export default function Login() {
               className="input-box"
             />
           </div>
-          <p className="text-[#1E4AE9] font-regular text-[16px] text-right">
-            Forgot Password?
-          </p>
+          <Link to="/forgetpassword">
+            <p className="text-[#1E4AE9] font-regular text-[16px] text-right">
+              Forgot Password?
+            </p>
+          </Link>
 
           <button
             type="submit"

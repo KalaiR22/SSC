@@ -16,6 +16,7 @@ export default {
         lightblue:'#D4D7E3',
         lightgrey:'#8897AD',
         lightwhite:'#F3F9FA',
+        lightborder:'#D9D9D9',
       },
       fontFamily:{
         librebodoni:[ 'Libre Bodoni', 'serif']

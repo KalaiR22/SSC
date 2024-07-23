@@ -6,10 +6,11 @@ import axios from "axios";
 import { ToastContainer, toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
+import tick from '../images/tick.png'
 
 
 export default function SignUp() {
-  const [phoneNumber, setPhoneNumber] = useState("");
+ 
   const [otp, setOtp] = useState("");
   const [verified, setVerified] = useState(false);
   const [username, setUsername] = useState("");
@@ -32,15 +33,9 @@ export default function SignUp() {
   const handleSendOtp = async (e) => {
     e.preventDefault();
     try {
-      const formattedPhoneNumber = phoneNumber.startsWith("+")
-        ? phoneNumber
-        : `+${phoneNumber}`;
-      if (!formattedPhoneNumber || formattedPhoneNumber.length < 10) {
-        throw new Error("Invalid phone number");
-      }
 
       await axios.post("http://localhost:3000/api/auth/sendotp", {
-        phoneNumber: formattedPhoneNumber,
+   
         email
       });
       notify();
@@ -52,12 +47,12 @@ export default function SignUp() {
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    console.log(phoneNumber, otp, username, password, email); // Check data in console
+    console.log( otp, username, password, email); // Check data in console
     try {
       const response = await axios.post(
         "http://localhost:3000/api/auth/verifyuser",
         {
-          phoneNumber,
+        
           otp,
           username,
           password,
@@ -66,10 +61,10 @@ export default function SignUp() {
       );
       console.log(response.data);
       if (
-        response.data.message === "Phone number verified and user data updated"
+        response.data.message === "email verified"
       ) {
         setVerified(true);
-        console.log("Phone number verified");
+        console.log("email verified");
       }
     } catch (err) {
       console.error(err.response.data); // Log the full error response
@@ -78,8 +73,8 @@ export default function SignUp() {
 
 
   return (
-    <div className="absolute login w-full h-screen">
-      <div className="bg-white sm:w-[500px] md:w-[700px] lg:w-[759px] sm:mx-auto lg:px-40 md:px-32 sm:px-24 px-8 mx-4 flex flex-col gap-3 py-10 my-3 rounded-xl">
+    <div className="absolute login w-full h-screen ">
+      <div className="bg-white sm:w-[500px] md:w-[700px] lg:w-[759px] sm:mx-auto lg:px-40 md:px-32 sm:px-24 px-8 mx-4 flex flex-col gap-3 py-10 my-5 rounded-xl">
         <h1 className="sm:text-[36px] text-[28px] font-regular">Welcome 👋</h1>
         <p className="text-blue sm:text-[20px] text-[15px] font-regular">
           Today is a new day. It's your day. You shape it. <br />
@@ -121,16 +116,6 @@ export default function SignUp() {
                 required
               />
             </div>
-            <div>
-              <p className="text-[16px] font-regular">Mobile no</p>
-              <PhoneInput
-                country={"us"}
-                value={phoneNumber}
-                onChange={setPhoneNumber}
-                inputClass="input-box"
-                enableSearch={true}
-              />
-            </div>
             <div className="mt-3">
               <div className="flex gap-2">
                 <input
@@ -155,20 +140,29 @@ export default function SignUp() {
             >
               Verify
             </button>
+            <h3 className="text-[18px] font-regular mx-auto">
+              Already have an account?{" "}
+              <span className="text-[#1E4AE9]">
+                {" "}
+                <Link to="/login">Sign in</Link>
+              </span>
+            </h3>
           </form>
         ) : (
-          <div>
-            <h3>Phone number verified and user signed up successfully</h3>
+          <div className="text-[38px] font-bold capitalize">
+            <h3> signed up successfully</h3>
+            <img
+              src={tick}
+              alt="tick"
+              className="flex items-center justify-center mx-auto"
+            />
+            <Link to="/login">
+              <button className="bg-green text-white text-[20px] px-10 py-2 rounded-full mx-auto flex items-center justify-center mt-12">
+                Login
+              </button>
+            </Link>
           </div>
         )}
-
-        <h3 className="text-[18px] font-regular mx-auto">
-          Already have an account?{" "}
-          <span className="text-[#1E4AE9]">
-            {" "}
-            <Link to='/login'>Sign in</Link>
-          </span>
-        </h3>
       </div>
       <ToastContainer
         position="top-right"
