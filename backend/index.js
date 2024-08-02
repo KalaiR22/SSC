@@ -9,7 +9,7 @@ import PasswordRoute from './routes/password.route.js';
 
 dotenv.config();
 
-mongoose.connect(process.env.MONGO, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb+srv://merntutorial:Kalaivani22@cluster0.qco5vc9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log("MongoDB is connected");
   })
