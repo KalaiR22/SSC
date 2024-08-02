@@ -9,7 +9,7 @@ import PasswordRoute from './routes/password.route.js';
 
 dotenv.config();
 
-mongoose.connect('mongodb+srv://merntutorial:Kalaivani22@cluster0.qco5vc9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGO, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log("MongoDB is connected");
   })
@@ -20,8 +20,16 @@ mongoose.connect('mongodb+srv://merntutorial:Kalaivani22@cluster0.qco5vc9.mongod
 
 const app = express();
 
+const corsOptions = {
+  origin: '*', // Replace with your allowed origins
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
 try {
-  app.use(cors());
+  app.use(cors(corsOptions));
   app.use(cookieParser());
   app.use(express.json());
 
