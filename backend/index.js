@@ -23,9 +23,7 @@ const app = express();
 const corsOptions = {
   origin: '*', // Replace with your allowed origins
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
-  optionsSuccessStatus: 200
 };
 
 try {
