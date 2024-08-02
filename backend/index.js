@@ -19,21 +19,23 @@ mongoose.connect(process.env.MONGO, { useNewUrlParser: true, useUnifiedTopology:
   });
 
 const app = express();
-app.use(cors());
-app.use(cookieParser());
-app.use(express.json());
 
-// Routes
-app.use('/api/auth', AuthRoute);
-app.use('/api/task', TaskRoute);
-app.use('/api/password', PasswordRoute);
+try {
+  app.use(cors());
+  app.use(cookieParser());
+  app.use(express.json());
 
-// Global Error Handling Middleware
-app.use((err, req, res, next) => {
+  // Routes
+  app.use('/api/auth', AuthRoute);
+  app.use('/api/task', TaskRoute);
+  app.use('/api/password', PasswordRoute);
+
+  // Global Error Handling Middleware
+  app.use((err, req, res, next) => {
     console.error("An error occurred:", {
-        message: err.message,
-        stack: err.stack,
-        statusCode: err.statusCode || 500,
+      message: err.message,
+      stack: err.stack,
+      statusCode: err.statusCode || 500,
     });
 
     const statusCode = err.statusCode || 500;
@@ -41,20 +43,25 @@ app.use((err, req, res, next) => {
 
     // Send JSON response with error details
     res.status(statusCode).json({
-        success: false,
-        statusCode,
-        message
+      success: false,
+      statusCode,
+      message
     });
-});
+  });
 
-// Fallback Route for Unmatched Endpoints
-app.use((req, res, next) => {
+  // Fallback Route for Unmatched Endpoints
+  app.use((req, res, next) => {
     res.status(404).json({
-        success: false,
-        message: "API endpoint not found"
+      success: false,
+      message: "API endpoint not found"
     });
-});
+  });
 
-app.listen(3000, () => {
-  console.log("Server is listening on port 3000");
-});
+  app.listen(3000, () => {
+    console.log("Server is listening on port 3000");
+  });
+
+} catch (err) {
+  console.error("An error occurred during app initialization:", err.message);
+  process.exit(1); // Exit process with failure
+}
